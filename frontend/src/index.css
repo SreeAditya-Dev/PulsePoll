@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #6C63FF;
+  --color-secondary: #00D4AA;
+  --color-bg: #0a0a0f;
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-text: #EAEAEA;
+  --color-text-muted: #9CA3AF;
+  
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  
+  @keyframes shimmer {
+    from { background-position: 0 0; }
+    to { background-position: -200% 0; }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+/* Base Styles */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  /* Radial gradient mesh background */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(108, 99, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(0, 212, 170, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Glass Utilities */
+.glass-panel {
+  background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card {
+  @apply glass-panel rounded-2xl p-6 transition-all duration-300;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom interactive elements */
+.btn-primary {
+  @apply px-6 py-3 rounded-xl font-bold transition-all duration-300 relative overflow-hidden;
+  background: linear-gradient(135deg, var(--color-primary), #5A52D5);
+  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-ghost {
+  @apply px-6 py-3 rounded-xl font-medium transition-all duration-200;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.input-glass {
+  @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 transition-all duration-200 outline-none;
+}
+
+.input-glass:focus {
+  @apply border-primary/50 bg-white/10 ring-2 ring-primary/20;
+}
