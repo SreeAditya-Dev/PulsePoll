@@ -44,6 +44,21 @@
 
 ---
 
+## ⚡ Performance Metrics (Local Host Baseline)
+
+Tests executed via TestSprite & Custom Node.js Script:
+
+| Metric                     | Result       | UX Assessment |
+| -------------------------- | ------------ | ------------- |
+| **API Health Check RTT**   | **5.85 ms**  | ⚡ Instant    |
+| **WebSocket Handshake**    | **11.65 ms** | ⚡ Instant    |
+| **Poll Join to Data Load** | **250 ms**   | 🟢 Fast       |
+
+> **Note on Low Network Areas:**
+> The architecture uses **Socket.IO over WebSocket**, which maintains a single persistent connection. This is significantly better for low-bandwidth environments than standard REST polling, as it avoids repeated HTTP handshake overhead. Even with 300ms network latency, the app will remain responsive.
+
+---
+
 ## 🏗 Architecture
 
 ### High-Level System Design

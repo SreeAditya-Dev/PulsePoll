@@ -1,73 +1,55 @@
-# React + TypeScript + Vite
+# 🌐 PulsePoll Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The responsive, real-time React application for PulsePoll. Built for speed and instant interactivity.
 
-Currently, two official plugins are available:
+## ⚡ Performance Note (Client-Side)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Designed for low-latency environments:
 
-## React Compiler
+- **Optimized Bundle Size:** Uses Vite for tree-shaking and code-splitting.
+- **WebSocket Efficiency:** Maintains a single persistent connection for updates, avoiding HTTP overhead.
+- **Instant UI Feedback:** Optimistic UI updates and local storage caching for immediate responsiveness even on slower networks (3G).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠 Tech Stack
 
-## Expanding the ESLint configuration
+- **Framework:** React 19 + Vite 7
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Components:** shadcn/ui (Radix Primitives)
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **State Management:** React Hooks + Context API
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🏃‍♂️ Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. **Install Dependencies**
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   ```bash
+   npm install
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Environment Variables**
+   Create a `.env` file (optional for local dev):
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+   ```env
+   VITE_API_URL=http://localhost:4000/api
+   VITE_SOCKET_URL=http://localhost:4000
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. **Run Development Server**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for Production**
+   ```bash
+   npm run build
+   ```
+
+## 📱 Key Features
+
+- **Responsive Design:** Optimized for mobile, tablet, and desktop viewports.
+- **Dark Mode:** Cosmic theme with deep blues and purples.
+- **Real-Time Charts:** Live bar charts that animate as votes come in.
+- **Share Modal:** Easy sharing via link copy or QR code.
