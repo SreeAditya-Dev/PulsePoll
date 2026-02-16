@@ -1,7 +1,5 @@
-@import "tailwindcss";
-
-/* ── Fontshare Fonts ─────────────────────────────────────── */
 @import url("https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@500,700&f[]=general-sans@400,500,600&display=swap");
+@import "tailwindcss";
 
 /* ── Cosmic Pulse Theme — shadcn HSL tokens ──────────────── */
 :root {

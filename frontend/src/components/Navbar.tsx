@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Github, Zap } from 'lucide-react'
+import { Github } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Navbar() {
@@ -21,14 +21,13 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <motion.div
-              className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary via-[hsl(280,70%,60%)] to-accent flex items-center justify-center shadow-lg shadow-primary/25"
+            <motion.img
+              src="/logo.png"
+              alt="PulsePoll Logo"
+              className="w-9 h-9 object-contain drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]"
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
-            >
-              <Zap className="w-5 h-5 text-white fill-white" />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity blur-lg" />
-            </motion.div>
+            />
             <span className="font-display font-bold text-xl tracking-tight text-foreground group-hover:text-gradient-primary transition-all">
               PulsePoll
             </span>
