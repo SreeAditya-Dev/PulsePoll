@@ -102,13 +102,58 @@ function getPlatformSignature(): string {
 }
 
 /**
- * SHA-256 hash using the Web Crypto API (available in all modern browsers).
+ * Pure-JS fallback hash (FNV-1a variant, 128-bit) for non-secure contexts.
+ * crypto.subtle is ONLY available in secure contexts (HTTPS or localhost).
+ * Network IPs like http://192.168.x.x will NOT have it.
  */
-async function sha256(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+function fallbackHash(message: string): string {
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < message.length; i++) {
+    const ch = message.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hash = (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+  // Double-hash for longer output
+  let h3 = 0x12345678;
+  let h4 = 0x9abcdef0;
+  for (let i = 0; i < message.length; i++) {
+    const ch = message.charCodeAt(i);
+    h3 = Math.imul(h3 ^ ch, 1540483477);
+    h4 = Math.imul(h4 ^ ch, 0x27d4eb2d);
+  }
+  h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
+  h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
+  return hash + (h4 >>> 0).toString(16).padStart(8, '0') + (h3 >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
+ * Hash a string — uses SHA-256 in secure contexts, falls back to FNV-1a otherwise.
+ */
+async function hashString(message: string): Promise<string> {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  return fallbackHash(message);
+}
+
+/**
+ * Safe localStorage helpers — storage throws in non-secure contexts.
+ */
+function safeGetItem(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeSetItem(key: string, value: string): void {
+  try { localStorage.setItem(key, value); } catch { /* noop */ }
+}
+function safeRemoveItem(key: string): void {
+  try { localStorage.removeItem(key); } catch { /* noop */ }
 }
 
 /**
@@ -120,7 +165,7 @@ async function sha256(message: string): Promise<string> {
  */
 export async function getDeviceFingerprint(): Promise<string> {
   // Check cache first
-  const cached = localStorage.getItem(FINGERPRINT_KEY);
+  const cached = safeGetItem(FINGERPRINT_KEY);
   if (cached) return cached;
 
   // Compose from all hardware signals
@@ -131,10 +176,10 @@ export async function getDeviceFingerprint(): Promise<string> {
     getPlatformSignature(),
   ].join('|||');
 
-  const hash = await sha256(components);
+  const hash = await hashString(components);
 
   // Cache the result
-  localStorage.setItem(FINGERPRINT_KEY, hash);
+  safeSetItem(FINGERPRINT_KEY, hash);
 
   return hash;
 }
@@ -144,7 +189,7 @@ export async function getDeviceFingerprint(): Promise<string> {
  * Call this if you suspect the cached value is stale.
  */
 export async function regenerateFingerprint(): Promise<string> {
-  localStorage.removeItem(FINGERPRINT_KEY);
+  safeRemoveItem(FINGERPRINT_KEY);
   return getDeviceFingerprint();
 }
 
@@ -153,7 +198,7 @@ export async function regenerateFingerprint(): Promise<string> {
   This provides immediate UI feedback before hitting the server.
 */
 export function hasVotedLocally(pollId: string): boolean {
-  const votedPolls = JSON.parse(localStorage.getItem('voted_polls') || '[]');
+  const votedPolls = JSON.parse(safeGetItem('voted_polls') || '[]');
   return votedPolls.includes(pollId);
 }
 
@@ -161,9 +206,10 @@ export function hasVotedLocally(pollId: string): boolean {
   Mark a poll as voted locally.
 */
 export function markPollAsVoted(pollId: string): void {
-  const votedPolls = JSON.parse(localStorage.getItem('voted_polls') || '[]');
+  const votedPolls = JSON.parse(safeGetItem('voted_polls') || '[]');
   if (!votedPolls.includes(pollId)) {
     votedPolls.push(pollId);
-    localStorage.setItem('voted_polls', JSON.stringify(votedPolls));
+    safeSetItem('voted_polls', JSON.stringify(votedPolls));
   }
 }
+

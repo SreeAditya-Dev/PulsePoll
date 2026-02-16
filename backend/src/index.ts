@@ -20,7 +20,8 @@ const server = http.createServer(app);
 // socket.io setup
 const io = new SocketServer(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: (_origin, callback) => callback(null, true),
+    credentials: true,
     methods: ['GET', 'POST'],
   },
   pingTimeout: 60000,
@@ -28,7 +29,7 @@ const io = new SocketServer(server, {
 });
 
 // middleware
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
