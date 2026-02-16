@@ -40,7 +40,10 @@ Tests executed via TestSprite & Custom Node.js Script:
    CLIENT_URL=http://localhost:5173
    SUPABASE_URL=...
    SUPABASE_ANON_KEY=...
-   REDIS_URL=redis://localhost:6379
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   REDIS_USERNAME=default
+   REDIS_PASSWORD=...
    ```
 
 3. **Database Setup**
