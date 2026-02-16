@@ -49,7 +49,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
 /*
   Check if an IP already voted on a specific poll.
-  Sets a redis flag for 1 hour.
+  Sets a redis flag for 24 hours (86400 seconds).
 */
 export async function markIpVoted(ip: string, pollId: string): Promise<void> {
   try {
