@@ -1,0 +1,31 @@
+{
+  "name": "pulsepoll-backend",
+  "version": "1.0.0",
+  "description": "PulsePoll real-time polling backend",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "npx nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "@types/cookie-parser": "^1.4.10",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nanoid": "^3.3.8",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "nodemon": "^3.1.9",
+    "socket.io-client": "^4.8.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

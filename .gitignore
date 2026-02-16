@@ -3,3 +3,7 @@ assignment.txt
 node_modules
 .env
 .env.local
+implementation_plan.md
+implementation_plan.md.resolved.0
+dist
+package-lock.json
