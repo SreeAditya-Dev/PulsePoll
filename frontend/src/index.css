@@ -1,110 +1,235 @@
 @import "tailwindcss";
 
+/* ── Fontshare Fonts ─────────────────────────────────────── */
+@import url("https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@500,700&f[]=general-sans@400,500,600&display=swap");
+
+/* ── Cosmic Pulse Theme — shadcn HSL tokens ──────────────── */
 :root {
-  --color-primary: #6C63FF;
-  --color-secondary: #00D4AA;
-  --color-bg: #0a0a0f;
-  --color-surface: rgba(255, 255, 255, 0.06);
-  --color-text: #EAEAEA;
-  --color-text-muted: #9CA3AF;
-  
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --background: 260 100% 3%;
+  --foreground: 0 0% 95%;
+
+  --card: 260 50% 6%;
+  --card-foreground: 0 0% 95%;
+
+  --popover: 260 50% 6%;
+  --popover-foreground: 0 0% 95%;
+
+  --primary: 263 70% 65%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 187 94% 43%;
+  --secondary-foreground: 0 0% 100%;
+
+  --accent: 330 86% 70%;
+  --accent-foreground: 0 0% 100%;
+
+  --muted: 260 50% 15%;
+  --muted-foreground: 260 10% 55%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 260 50% 20%;
+  --input: 260 50% 12%;
+  --ring: 263 70% 65%;
+
+  --radius: 0.75rem;
+
+  /* Raw color values for use in rgba() */
+  --color-primary-raw: 139, 92, 246;
+  --color-secondary-raw: 6, 182, 212;
+  --color-accent-raw: 244, 114, 182;
 }
 
+/* ── Tailwind v4 Theme Extension ─────────────────────────── */
 @theme {
-  --color-primary: var(--color-primary);
-  --color-secondary: var(--color-secondary);
-  --color-bg: var(--color-bg);
-  --color-surface: var(--color-surface);
-  
-  --font-heading: var(--font-heading);
-  --font-body: var(--font-body);
-  
-  --animate-shimmer: shimmer 2s linear infinite;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-display: "Clash Display", sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+  --font-body: "General Sans", sans-serif;
+
+  --animate-shimmer: shimmer 2.5s linear infinite;
   --animate-float: float 6s ease-in-out infinite;
-  
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-breathe: breathe 2s ease-in-out infinite;
+
   @keyframes shimmer {
-    from { background-position: 0 0; }
-    to { background-position: -200% 0; }
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
   }
-  
+
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
   }
 }
 
-/* Base Styles */
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  /* Radial gradient mesh background */
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(108, 99, 255, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(0, 212, 170, 0.1) 0px, transparent 50%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
+/* ── Base Styles ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  border-color: hsl(var(--border));
 }
 
-h1, h2, h3, h4, h5, h6 {
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Cosmic gradient mesh background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 10% 0%,
+      rgba(var(--color-primary-raw), 0.12) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 90% 10%,
+      rgba(var(--color-secondary-raw), 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 50% 100%,
+      rgba(var(--color-accent-raw), 0.06) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+h1,
+h2,
+h3 {
   font-family: var(--font-heading);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
-/* Glass Utilities */
-.glass-panel {
-  background: var(--color-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+h1 {
+  font-family: var(--font-display);
 }
 
-.glass-card {
-  @apply glass-panel rounded-2xl p-6 transition-all duration-300;
+/* ── Selection Colors ────────────────────────────────────── */
+::selection {
+  background: rgba(var(--color-primary-raw), 0.3);
+  color: white;
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-primary-raw), 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-primary-raw), 0.5);
 }
 
-/* Custom interactive elements */
-.btn-primary {
-  @apply px-6 py-3 rounded-xl font-bold transition-all duration-300 relative overflow-hidden;
-  background: linear-gradient(135deg, var(--color-primary), #5A52D5);
-  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+/* ── Glass Utilities ─────────────────────────────────────── */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+/* ── Gradient Text Utility ───────────────────────────────── */
+.text-gradient-primary {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--secondary))
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.btn-primary:active {
-  transform: translateY(0);
+.text-gradient-accent {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.btn-ghost {
-  @apply px-6 py-3 rounded-xl font-medium transition-all duration-200;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* ── Glow Utilities ──────────────────────────────────────── */
+.glow-primary {
+  box-shadow:
+    0 0 20px rgba(var(--color-primary-raw), 0.15),
+    0 0 60px rgba(var(--color-primary-raw), 0.05);
 }
 
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.input-glass {
-  @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 transition-all duration-200 outline-none;
-}
-
-.input-glass:focus {
-  @apply border-primary/50 bg-white/10 ring-2 ring-primary/20;
+.glow-primary-strong {
+  box-shadow:
+    0 0 20px rgba(var(--color-primary-raw), 0.3),
+    0 0 60px rgba(var(--color-primary-raw), 0.1),
+    0 0 100px rgba(var(--color-primary-raw), 0.05);
 }

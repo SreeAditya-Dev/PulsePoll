@@ -1,0 +1,47 @@
+[
+  {
+    "id": "TC001",
+    "title": "post api polls create new poll",
+    "description": "Test creating a new poll with valid question, options, and fingerprint. Verify response status 201 and returned pollId and shareCode."
+  },
+  {
+    "id": "TC002",
+    "title": "post api polls validate poll creation input",
+    "description": "Test poll creation with missing question or fewer than 2 options or more than 10 options. Verify response status 400 with validation error."
+  },
+  {
+    "id": "TC003",
+    "title": "get api polls sharecode retrieve poll details",
+    "description": "Test retrieving poll details by shareCode. Verify response status 200 with poll data, options, tallies, totalVotes, and hasVoted flag."
+  },
+  {
+    "id": "TC004",
+    "title": "get api polls sharecode handle poll not found",
+    "description": "Test retrieving poll details with non-existent shareCode. Verify response status 404 with poll not found error."
+  },
+  {
+    "id": "TC005",
+    "title": "post api polls sharecode vote submit valid vote",
+    "description": "Test submitting a valid vote with optionId and fingerprint. Verify response status 200 with success message and real-time vote update emitted."
+  },
+  {
+    "id": "TC006",
+    "title": "post api polls sharecode vote handle invalid option",
+    "description": "Test submitting a vote with invalid optionId or non-existent poll. Verify response status 404 with appropriate error."
+  },
+  {
+    "id": "TC007",
+    "title": "post api polls sharecode vote prevent duplicate voting",
+    "description": "Test submitting a vote with a fingerprint that already voted or from same IP exceeding rate limit. Verify response status 409 with already voted error."
+  },
+  {
+    "id": "TC008",
+    "title": "post api polls sharecode vote handle closed poll",
+    "description": "Test submitting a vote after poll is closed or expired. Verify response status 410 with poll no longer active error."
+  },
+  {
+    "id": "TC009",
+    "title": "get api health check server status",
+    "description": "Test health check endpoint to verify server is running. Verify response status 200 with status ok."
+  }
+]

@@ -1,0 +1,44 @@
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  PulsePoll Comprehensive API Test Suite
+  Target: http://localhost:4000/api
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+ΓöÇΓöÇ Health Check ΓöÇΓöÇ
+Γ¥î TC009: Health check ΓÇö Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+
+ΓöÇΓöÇ Poll Creation ΓöÇΓöÇ
+Γ£à TC001: Create poll with valid data ΓÇö 391ms, shareCode=d4eqqrn5
+Γ£à TC002a: Reject empty question ΓÇö Status: 400
+Γ£à TC002b: Reject fewer than 2 options ΓÇö Status: 400
+Γ¥î TC002c: More than 10 options should return 400 ΓÇö Got: 429
+
+ΓöÇΓöÇ Poll Retrieval ΓöÇΓöÇ
+Γ¥î TC003: Retrieve poll ΓÇö Status: 429, Body keys: error,message,retryAfterMs
+Γ¥î TC004: Non-existent poll ΓÇö Expected 404, got 429
+
+ΓöÇΓöÇ Vote Submission ΓöÇΓöÇ
+Γ¥î TC006: Invalid option ΓÇö Expected 404, got 429
+
+ΓöÇΓöÇ Anti-Abuse ΓöÇΓöÇ
+Γ¥î TC008: Non-existent poll vote ΓÇö Expected 404, got 429
+
+ΓöÇΓöÇ Performance Benchmarks ΓöÇΓöÇ
+Γ£à PERF01: Health avg 72.9ms, max 83ms ΓÇö < 200ms threshold
+Γ£à PERF02: Poll creation avg 73.0ms, max 79ms ΓÇö < 1000ms threshold
+Γ£à PERF03: Poll retrieval avg 78.7ms, max 93ms ΓÇö < 500ms threshold
+
+ΓöÇΓöÇ Concurrent / Stress Test ΓöÇΓöÇ
+Γ¥î STRESS01: 20 concurrent health checks ΓÇö Statuses: 429
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  RESULTS: 6/13 passed, 7 failed
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+Γ¥î Failed tests:
+   TC009: Health check ΓÇö Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+   TC002c: More than 10 options should return 400 ΓÇö Got: 429
+   TC003: Retrieve poll ΓÇö Status: 429, Body keys: error,message,retryAfterMs
+   TC004: Non-existent poll ΓÇö Expected 404, got 429
+   TC006: Invalid option ΓÇö Expected 404, got 429
+   TC008: Non-existent poll vote ΓÇö Expected 404, got 429
+   STRESS01: 20 concurrent health checks ΓÇö Statuses: 429

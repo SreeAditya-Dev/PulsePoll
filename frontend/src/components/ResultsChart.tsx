@@ -1,72 +1,150 @@
-import { useState, useEffect } from 'react';
-import type { PollOption } from '../lib/types';
-import clsx from 'clsx';
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Crown, TrendingUp } from 'lucide-react'
+import type { PollOption } from '@/lib/types'
+import { staggerContainer, staggerItem } from '@/lib/motion'
+import { cn } from '@/lib/utils'
 
 interface ResultsChartProps {
-  options: PollOption[];
-  tallies: Record<string, number>;
-  totalVotes: number;
+  options: PollOption[]
+  tallies: Record<string, number>
+  totalVotes: number
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const [display, setDisplay] = useState(value)
+
+  useEffect(() => {
+    const diff = value - display
+    if (diff === 0) return
+
+    const steps = 15
+    const increment = diff / steps
+    let current = display
+    let step = 0
+
+    const timer = setInterval(() => {
+      step++
+      current += increment
+      if (step >= steps) {
+        setDisplay(value)
+        clearInterval(timer)
+      } else {
+        setDisplay(Math.round(current))
+      }
+    }, 30)
+
+    return () => clearInterval(timer)
+  }, [value])
+
+  return <span className="tabular-nums">{display}</span>
 }
 
 export function ResultsChart({ options, tallies, totalVotes }: ResultsChartProps) {
-  // Sort options by vote count descending for a better visual
-  const [sortedOptions, setSortedOptions] = useState(options);
+  const sortedOptions = [...options].sort((a, b) => a.position - b.position)
+  const maxVotes = Math.max(...Object.values(tallies), 0)
+  const [hasAnimated, setHasAnimated] = useState(false)
 
   useEffect(() => {
-    // Keep original order or sort? Let's keep original order to match the question flow
-    // but maybe we can add a toggle later.
-    // For now, let's stick to the defined position order.
-    setSortedOptions([...options].sort((a, b) => a.position - b.position));
-  }, [options]);
-
-
+    const timer = setTimeout(() => setHasAnimated(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
-    <div className="space-y-4 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {sortedOptions.map((opt) => {
-        const count = tallies[opt.id] || 0;
-        const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : '0.0';
-        const isLeader = count > 0 && count === Math.max(...Object.values(tallies));
+    <motion.div
+      className="space-y-4 w-full"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
+      {sortedOptions.map((opt, idx) => {
+        const count = tallies[opt.id] || 0
+        const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0
+        const percentageStr = percentage.toFixed(1)
+        const isLeader = count > 0 && count === maxVotes
 
         return (
-          <div key={opt.id} className="relative group">
-            <div className="flex justify-between items-end mb-1 px-1">
-              <span className={clsx("font-medium transition-colors", isLeader ? "text-white" : "text-white/70")}>
-                {opt.label}
-              </span>
-              <div className="text-right">
-                <span className={clsx("text-sm font-bold", isLeader ? "text-primary" : "text-white/60")}>
-                  {percentage}%
+          <motion.div
+            key={opt.id}
+            variants={staggerItem}
+            className="relative group"
+          >
+            {/* Label row */}
+            <div className="flex justify-between items-center mb-1.5 px-0.5">
+              <div className="flex items-center gap-2">
+                {isLeader && (
+                  <motion.span
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  >
+                    <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+                  </motion.span>
+                )}
+                <span
+                  className={cn(
+                    'font-medium text-sm transition-colors',
+                    isLeader ? 'text-foreground' : 'text-foreground/60'
+                  )}
+                >
+                  {opt.label}
                 </span>
-                <span className="text-xs text-white/30 ml-2">({count})</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-right">
+                <span
+                  className={cn(
+                    'text-sm font-bold tabular-nums',
+                    isLeader ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                >
+                  {percentageStr}%
+                </span>
+                <span className="text-xs text-muted-foreground/50 tabular-nums">
+                  (<AnimatedNumber value={count} />)
+                </span>
               </div>
             </div>
 
             {/* Bar container */}
-            <div className="h-3 bg-white/5 rounded-full overflow-hidden relative backdrop-blur-sm border border-white/5">
+            <div className="h-3 bg-muted/30 rounded-full overflow-hidden relative border border-border/20">
               {/* Animated Bar */}
-              <div
-                className={clsx(
-                  "h-full rounded-full transition-all duration-700 ease-out relative overflow-hidden",
-                  isLeader 
-                    ? "bg-gradient-to-r from-primary to-secondary shadow-[0_0_15px_rgba(108,99,255,0.4)]" 
-                    : "bg-white/20"
+              <motion.div
+                className={cn(
+                  'h-full rounded-full relative overflow-hidden',
+                  isLeader
+                    ? 'bg-gradient-to-r from-primary via-[hsl(280,70%,60%)] to-secondary'
+                    : 'bg-gradient-to-r from-muted-foreground/30 to-muted-foreground/20'
                 )}
-                style={{ width: `${percentage}%` }}
+                initial={{ width: '0%' }}
+                animate={{ width: hasAnimated ? `${percentage}%` : '0%' }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 80,
+                  damping: 18,
+                  delay: idx * 0.1,
+                }}
               >
-                {/* Shimmer effect for leader */}
+                {/* Shimmer on leader */}
                 {isLeader && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full -translate-x-full animate-[shimmer_2s_infinite]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
                 )}
-              </div>
+              </motion.div>
             </div>
-          </div>
-        );
+          </motion.div>
+        )
       })}
 
-      <div className="pt-4 text-center text-white/30 text-xs uppercase tracking-widest font-medium">
-        Total Votes: {totalVotes}
-      </div>
-    </div>
-  );
+      {/* Total */}
+      <motion.div
+        className="pt-4 flex items-center justify-center gap-2 text-muted-foreground/40 text-xs uppercase tracking-widest font-medium"
+        variants={staggerItem}
+      >
+        <TrendingUp className="w-3.5 h-3.5" />
+        <span>
+          <AnimatedNumber value={totalVotes} /> total votes
+        </span>
+      </motion.div>
+    </motion.div>
+  )
 }

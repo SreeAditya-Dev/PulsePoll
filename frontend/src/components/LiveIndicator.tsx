@@ -1,34 +1,55 @@
-
+import { motion } from 'framer-motion'
+import { Users } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 interface LiveIndicatorProps {
-  isConnected: boolean;
-  viewerCount: number;
+  isConnected: boolean
+  viewerCount: number
 }
 
 export function LiveIndicator({ isConnected, viewerCount }: LiveIndicatorProps) {
   return (
-    <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 backdrop-blur-md">
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2.5 w-2.5">
+    <div className="flex items-center gap-2">
+      <Badge variant={isConnected ? 'live' : 'destructive'} className="gap-1.5 px-3 py-1">
+        <span className="relative flex h-2 w-2">
           {isConnected && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <motion.span
+              className="absolute inline-flex h-full w-full rounded-full bg-emerald-400"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.7, 0, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
           )}
-          <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+          <span
+            className={cn(
+              'relative inline-flex rounded-full h-2 w-2',
+              isConnected ? 'bg-emerald-500' : 'bg-destructive'
+            )}
+          />
         </span>
-        <span className="text-xs font-medium text-white/80 uppercase tracking-wide">
+        <span className="text-xs font-semibold uppercase tracking-wide">
           {isConnected ? 'Live' : 'Offline'}
         </span>
-      </div>
-      
-      {isConnected && (
-        <>
-          <div className="w-px h-3 bg-white/20"></div>
-          <div className="flex items-center gap-1.5 text-xs text-white/60">
-            <span>👥</span>
-            <span>{viewerCount} online</span>
-          </div>
-        </>
+      </Badge>
+
+      {isConnected && viewerCount > 0 && (
+        <motion.div
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Badge variant="outline" className="gap-1.5 px-2.5 py-1">
+            <Users className="w-3 h-3" />
+            <motion.span
+              key={viewerCount}
+              initial={{ y: -8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="text-xs tabular-nums"
+            >
+              {viewerCount}
+            </motion.span>
+          </Badge>
+        </motion.div>
       )}
     </div>
-  );
+  )
 }

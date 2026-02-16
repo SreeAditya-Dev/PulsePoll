@@ -1,181 +1,243 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
-import { api } from '../lib/api';
-import type { PollData } from '../lib/types';
-import { getDeviceFingerprint, hasVotedLocally, markPollAsVoted } from '../lib/fingerprint';
-import { usePollSocket } from '../hooks/usePollSocket';
-import { LiveIndicator } from '../components/LiveIndicator';
-import { VotePanel } from '../components/VotePanel';
-import { ResultsChart } from '../components/ResultsChart';
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, Calendar, BarChart3, Check, Link as LinkIcon } from 'lucide-react'
+import { Navbar } from '@/components/Navbar'
+import { api } from '@/lib/api'
+import type { PollData } from '@/lib/types'
+import { getDeviceFingerprint, hasVotedLocally, markPollAsVoted } from '@/lib/fingerprint'
+import { usePollSocket } from '@/hooks/usePollSocket'
+import { LiveIndicator } from '@/components/LiveIndicator'
+import { VotePanel } from '@/components/VotePanel'
+import { ResultsChart } from '@/components/ResultsChart'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { pageTransition } from '@/lib/motion'
 
 export function Poll() {
-  const { shareCode } = useParams<{ shareCode: string }>();
-  const [pollData, setPollData] = useState<PollData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasVoted, setHasVoted] = useState(false);
+  const { shareCode } = useParams<{ shareCode: string }>()
+  const [pollData, setPollData] = useState<PollData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [hasVoted, setHasVoted] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  // Initialize Socket.IO hook
-  const { 
-    isConnected, 
-    tallies, 
-    totalVotes, 
-    viewerCount,
-    isActive 
-  } = usePollSocket({ shareCode });
+  const { isConnected, tallies, totalVotes, viewerCount, isActive } = usePollSocket({ shareCode })
 
   useEffect(() => {
-    if (!shareCode) return;
+    if (!shareCode) return
 
     const fetchPoll = async () => {
       try {
-        const fingerprint = getDeviceFingerprint();
-        const data = await api.getPoll(shareCode, fingerprint);
-        setPollData(data);
-        
-        // Check if user has voted (either from API or local storage)
+        const fingerprint = getDeviceFingerprint()
+        const data = await api.getPoll(shareCode, fingerprint)
+        setPollData(data)
+
         if (data.hasVoted || hasVotedLocally(data.poll.id)) {
-          setHasVoted(true);
-          // Ensure local storage is in sync
-          markPollAsVoted(data.poll.id);
+          setHasVoted(true)
+          markPollAsVoted(data.poll.id)
         }
       } catch (err: any) {
-        console.error('Failed to load poll:', err);
-        setError(err.message || 'Failed to load poll');
+        console.error('Failed to load poll:', err)
+        setError(err.message || 'Failed to load poll')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchPoll();
-  }, [shareCode]);
+    fetchPoll()
+  }, [shareCode])
 
-  // Handle successful vote from VotePanel
-  const handleVoteSuccess = () => {
-    setHasVoted(true);
-  };
+  const handleVoteSuccess = () => setHasVoted(true)
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary border-r-2 border-r-transparent"></div>
-      </div>
-    );
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch (err) {
+      console.error('Copy failed:', err)
+    }
   }
 
-  if (error || !pollData) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center p-4">
-        <div className="glass-card max-w-md w-full p-8 text-center space-y-6">
-          <div className="text-6xl mb-4">😕</div>
-          <h2 className="text-2xl font-bold text-white">Poll Not Found</h2>
-          <p className="text-white/60">{error || "This poll doesn't exist or has expired."}</p>
-          <Link to="/" className="btn-primary inline-block">
-            Create a New Poll
-          </Link>
+      <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+        <Navbar />
+        <div className="w-full max-w-3xl mx-auto space-y-6 mt-8">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       </div>
-    );
+    )
+  }
+
+  // Error state
+  if (error || !pollData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="max-w-md w-full">
+            <CardContent className="p-8 text-center space-y-5">
+              <div className="text-6xl mb-2">😕</div>
+              <h2 className="text-2xl font-heading font-bold text-foreground">Poll Not Found</h2>
+              <p className="text-muted-foreground text-sm">
+                {error || "This poll doesn't exist or has expired."}
+              </p>
+              <Button asChild variant="gradient" className="w-full">
+                <Link to="/">Create a New Poll</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
       <Navbar />
-      
-      <main className="w-full max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
-        
-        {/* Connection Status Bar */}
-        <div className="flex justify-between items-center px-2">
-          <Link to="/" className="text-sm text-white/40 hover:text-white transition-colors flex items-center gap-2">
-            ← Back to Home
+
+      <motion.main
+        className="w-full max-w-3xl mx-auto space-y-6"
+        variants={pageTransition}
+        initial="initial"
+        animate="animate"
+      >
+        {/* Top bar */}
+        <div className="flex justify-between items-center px-1">
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            Back
           </Link>
           <LiveIndicator isConnected={isConnected} viewerCount={viewerCount} />
         </div>
 
-        {/* Poll Header */}
-        <div className="glass-card p-8 border-t border-white/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10 animate-float">
-            <span className="text-9xl font-bold text-white">?</span>
-          </div>
-          
-          <div className="relative z-10">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+        {/* Poll Header Card */}
+        <Card className="relative overflow-hidden">
+          {/* Background decorative element */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
+
+          <CardContent className="p-6 sm:p-8 relative z-10">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-4 leading-tight tracking-tight">
               {pollData.poll.question}
             </h1>
-            
-            <div className="flex flex-wrap items-center gap-4 text-sm text-white/40">
-              <span className="flex items-center gap-1.5">
-                📅 {new Date(pollData.poll.createdAt).toLocaleDateString()}
-              </span>
-              <span className="flex items-center gap-1.5">
-                🗳️ {totalVotes > 0 ? totalVotes : pollData.totalVotes} votes total
-              </span>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant="outline" className="gap-1.5">
+                <Calendar className="w-3 h-3" />
+                {new Date(pollData.poll.createdAt).toLocaleDateString()}
+              </Badge>
+              <Badge variant="outline" className="gap-1.5">
+                <BarChart3 className="w-3 h-3" />
+                {totalVotes > 0 ? totalVotes : pollData.totalVotes} votes
+              </Badge>
               {!isActive && (
-                 <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-xs font-bold uppercase tracking-wide border border-red-500/20">
-                   Ended
-                 </span>
+                <Badge variant="destructive">Ended</Badge>
               )}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Dynamic Content Area: Voting or Results */}
-        <div className="glass-panel p-8 rounded-2xl transition-all duration-500">
-          {!hasVoted && isActive ? (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-              <h2 className="text-xl font-semibold text-white mb-6">Cast your vote</h2>
-              <VotePanel 
-                shareCode={shareCode!} 
-                pollId={pollData.poll.id}
-                options={pollData.options}
-                onVoteSuccess={handleVoteSuccess}
-                isExpired={!isActive}
-              />
-            </div>
-          ) : (
-            <div className="animate-in fade-in zoom-in-95 duration-500">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center justify-between">
-                <span>Live Results</span>
-                {hasVoted && (
-                  <span className="text-xs font-normal text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">
-                    You've voted
-                  </span>
-                )}
-              </h2>
-              <ResultsChart 
-                options={pollData.options}
-                // Merge initial tallies with live updates
-                tallies={{ ...pollData.tallies, ...tallies }} 
-                // Use live total if available, otherwise initial
-                totalVotes={totalVotes > 0 ? totalVotes : pollData.totalVotes}
-              />
-              
-              <div className="mt-8 pt-6 border-t border-white/5 text-center relative">
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    const btn = document.getElementById('copy-btn');
-                    if (btn) {
-                        const originalText = btn.innerHTML;
-                        btn.innerHTML = '<span>✨</span> Link Copied!';
-                        btn.classList.add('text-green-400');
-                        setTimeout(() => {
-                            btn.innerHTML = originalText;
-                            btn.classList.remove('text-green-400');
-                        }, 2000);
-                    }
-                  }}
-                  id="copy-btn"
-                  className="text-sm text-primary hover:text-primary-light transition-all duration-200 flex items-center justify-center gap-2 mx-auto active:scale-95"
+        {/* Dynamic Content: Vote or Results */}
+        <Card>
+          <CardContent className="p-6 sm:p-8">
+            <AnimatePresence mode="wait">
+              {!hasVoted && isActive ? (
+                <motion.div
+                  key="vote"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <span>🔗</span> Share this poll
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+                  <h2 className="text-lg font-heading font-bold text-foreground mb-5">
+                    Cast your vote
+                  </h2>
+                  <VotePanel
+                    shareCode={shareCode!}
+                    pollId={pollData.poll.id}
+                    options={pollData.options}
+                    onVoteSuccess={handleVoteSuccess}
+                    isExpired={!isActive}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="results"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="text-lg font-heading font-bold text-foreground">
+                      Live Results
+                    </h2>
+                    {hasVoted && (
+                      <Badge variant="success" className="gap-1">
+                        ✓ You've voted
+                      </Badge>
+                    )}
+                  </div>
+
+                  <ResultsChart
+                    options={pollData.options}
+                    tallies={{ ...pollData.tallies, ...tallies }}
+                    totalVotes={totalVotes > 0 ? totalVotes : pollData.totalVotes}
+                  />
+
+                  {/* Share link */}
+                  <div className="mt-6 pt-5 border-t border-border/30 text-center">
+                    <Button
+                      onClick={handleCopyLink}
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-foreground gap-2"
+                    >
+                      <AnimatePresence mode="wait">
+                        {copied ? (
+                          <motion.span
+                            key="copied"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="flex items-center gap-1.5 text-emerald-400"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Link Copied!
+                          </motion.span>
+                        ) : (
+                          <motion.span
+                            key="share"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="flex items-center gap-1.5"
+                          >
+                            <LinkIcon className="w-3.5 h-3.5" />
+                            Share this poll
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </motion.main>
     </div>
-  );
+  )
 }
