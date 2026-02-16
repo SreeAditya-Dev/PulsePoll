@@ -5,6 +5,8 @@ import { Home } from '@/pages/Home'
 import { Poll } from '@/pages/Poll'
 import { NotFound } from '@/pages/NotFound'
 
+import { Footer } from '@/components/Footer'
+
 function AnimatedRoutes() {
   const location = useLocation()
 
@@ -23,7 +25,10 @@ function App() {
   return (
     <TooltipProvider>
       <Router>
-        <AnimatedRoutes />
+        <div className="flex flex-col min-h-screen">
+          <AnimatedRoutes />
+          <Footer />
+        </div>
       </Router>
     </TooltipProvider>
   )
