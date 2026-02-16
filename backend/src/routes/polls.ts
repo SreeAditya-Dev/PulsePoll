@@ -194,6 +194,28 @@ router.get('/:shareCode', async (req: Request, res: Response) => {
       hasVoted = (existingVote && existingVote.length > 0) || false;
     }
 
+    // Also check by IP (catches cross-profile / cross-browser on same machine)
+    if (!hasVoted) {
+      const voterIp = req.ip || req.socket.remoteAddress || 'unknown';
+      if (voterIp !== 'unknown') {
+        const { data: ipVote } = await supabase
+          .from('votes')
+          .select('id')
+          .eq('poll_id', poll.id)
+          .eq('voter_ip', voterIp)
+          .limit(1);
+        hasVoted = (ipVote && ipVote.length > 0) || false;
+      }
+    }
+
+    // Also check HTTP-only cookie
+    if (!hasVoted) {
+      const cookieName = `pv_${poll.id.replace(/-/g, '').substring(0, 12)}`;
+      if (req.cookies && req.cookies[cookieName]) {
+        hasVoted = true;
+      }
+    }
+
     const totalVotes = Object.values(voteCounts).reduce((sum, c) => sum + c, 0);
 
     const enrichedOptions = options.map((opt) => ({
