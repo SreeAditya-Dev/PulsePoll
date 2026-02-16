@@ -53,6 +53,10 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API-prefixed health check for test suite and clients using /api
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 // setup socket handlers
 setupPollSockets(io);
 
