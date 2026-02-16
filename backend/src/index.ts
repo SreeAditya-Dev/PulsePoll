@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { Server as SocketServer } from 'socket.io';
 import pollRoutes, { setSocketIO } from './routes/polls';
@@ -27,8 +28,9 @@ const io = new SocketServer(server, {
 });
 
 // middleware
-app.use(cors({ origin: CLIENT_URL }));
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 
 // trust proxy for correct IP detection behind reverse proxies
 app.set('trust proxy', 1);

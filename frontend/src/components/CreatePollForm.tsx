@@ -52,7 +52,7 @@ export function CreatePollForm() {
     }
 
     try {
-      const fingerprint = getDeviceFingerprint()
+      const fingerprint = await getDeviceFingerprint()
       const result = await api.createPoll({ question, options: cleanOptions, fingerprint })
       setCreatedShareCode(result.shareCode)
       setIsModalOpen(true)

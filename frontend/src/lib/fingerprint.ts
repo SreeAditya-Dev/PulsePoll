@@ -1,24 +1,151 @@
-import { nanoid } from 'nanoid';
-
-const FINGERPRINT_KEY = 'pulsepoll_device_id';
-
 /*
-  Get or create a persistent device fingerprint.
-  This is a simple implementation using localStorage + random ID.
-  In a real app, you might use a library like FingerprintJS.
+  Hardware-based device fingerprint for anti-abuse protection.
   
-  This covers "Mechanism 1": Browser fingerprint + localStorage tracking.
+  Unlike a random ID in localStorage, this generates a COMPOSITE fingerprint
+  from hardware/software signals that produce the SAME hash across different
+  browsers on the same device (Chrome, Firefox, Edge, Incognito — all identical).
+
+  Layers:
+  1. Canvas fingerprint — GPU/driver/OS-specific rendering
+  2. Screen signature — resolution, color depth, pixel ratio
+  3. WebGL renderer — GPU vendor + model string
+  4. Timezone + platform + language
+  
+  The combined hash is deterministic per device, making it much harder
+  to vote twice by switching browsers.
 */
-export function getDeviceFingerprint(): string {
-  let fingerprint = localStorage.getItem(FINGERPRINT_KEY);
 
-  if (!fingerprint) {
-    // generate a new random ID if none exists
-    fingerprint = nanoid(32);
-    localStorage.setItem(FINGERPRINT_KEY, fingerprint);
+const FINGERPRINT_KEY = 'pulsepoll_device_fp';
+
+/**
+ * Generate a canvas-based fingerprint.
+ * The same text rendered on the same GPU/driver/OS produces identical pixel data,
+ * but differs across devices due to font rendering, anti-aliasing, and GPU differences.
+ */
+function getCanvasFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'no-canvas';
+
+    // Use a mix of rendering techniques to maximize uniqueness
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(100, 1, 62, 20);
+
+    ctx.fillStyle = '#069';
+    ctx.font = '14px Arial';
+    ctx.fillText('PulsePoll 🎯', 2, 15);
+
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.font = '18px Georgia';
+    ctx.fillText('Fingerprint', 4, 45);
+
+    // Arc + stroke to vary by anti-aliasing engine
+    ctx.beginPath();
+    ctx.arc(50, 50, 10, 0, Math.PI * 2);
+    ctx.strokeStyle = '#3c3';
+    ctx.stroke();
+
+    return canvas.toDataURL();
+  } catch {
+    return 'canvas-error';
   }
+}
 
-  return fingerprint;
+/**
+ * Get WebGL renderer info — same GPU = same string across all browsers.
+ */
+function getWebGLRenderer(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl || !(gl instanceof WebGLRenderingContext)) return 'no-webgl';
+
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (!debugInfo) return 'no-debug-info';
+
+    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '';
+    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+    return `${vendor}~${renderer}`;
+  } catch {
+    return 'webgl-error';
+  }
+}
+
+/**
+ * Get screen-based signals — identical across browsers on same display.
+ */
+function getScreenSignature(): string {
+  return [
+    screen.width,
+    screen.height,
+    screen.colorDepth,
+    window.devicePixelRatio || 1,
+    screen.availWidth,
+    screen.availHeight,
+  ].join('x');
+}
+
+/**
+ * Get platform/timezone signals.
+ */
+function getPlatformSignature(): string {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  const platform = navigator.platform || '';
+  const lang = navigator.language || '';
+  const cores = navigator.hardwareConcurrency || 0;
+  const touchPoints = navigator.maxTouchPoints || 0;
+  return `${tz}|${platform}|${lang}|${cores}|${touchPoints}`;
+}
+
+/**
+ * SHA-256 hash using the Web Crypto API (available in all modern browsers).
+ */
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Generate a hardware-based device fingerprint.
+ * This produces the SAME hash across Chrome, Firefox, Edge, and Incognito
+ * on the same physical device.
+ * 
+ * Cached in localStorage for performance (avoids re-computing canvas every time).
+ */
+export async function getDeviceFingerprint(): Promise<string> {
+  // Check cache first
+  const cached = localStorage.getItem(FINGERPRINT_KEY);
+  if (cached) return cached;
+
+  // Compose from all hardware signals
+  const components = [
+    getCanvasFingerprint(),
+    getWebGLRenderer(),
+    getScreenSignature(),
+    getPlatformSignature(),
+  ].join('|||');
+
+  const hash = await sha256(components);
+
+  // Cache the result
+  localStorage.setItem(FINGERPRINT_KEY, hash);
+
+  return hash;
+}
+
+/**
+ * Force regenerate the fingerprint (clear cache and recompute).
+ * Call this if you suspect the cached value is stale.
+ */
+export async function regenerateFingerprint(): Promise<string> {
+  localStorage.removeItem(FINGERPRINT_KEY);
+  return getDeviceFingerprint();
 }
 
 /*

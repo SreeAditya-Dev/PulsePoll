@@ -26,6 +26,7 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/polls`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return handleResponse<CreatePollResponse>(response);
@@ -37,7 +38,9 @@ export const api = {
       url.searchParams.append('fingerprint', fingerprint);
     }
     
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), {
+      credentials: 'include',
+    });
     return handleResponse<PollData>(response);
   },
 
@@ -45,6 +48,7 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/polls/${shareCode}/vote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ optionId, fingerprint }),
     });
     return handleResponse<VoteResponse>(response);

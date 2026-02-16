@@ -255,6 +255,16 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
       return;
     }
 
+    // --- Anti-abuse Layer 3: HTTP-only cookie check ---
+    const cookieName = `pv_${poll.id.replace(/-/g, '').substring(0, 12)}`;
+    if (req.cookies && req.cookies[cookieName]) {
+      res.status(409).json({
+        error: 'Already voted',
+        message: 'You have already voted on this poll.',
+      });
+      return;
+    }
+
     // verify option belongs to this poll
     const { data: option, error: optError } = await supabase
       .from('poll_options')
@@ -270,7 +280,7 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
 
     const hashedFp = hashFingerprint(fingerprint);
 
-    // --- Anti-abuse check #2: IP-based Redis check ---
+    // --- Anti-abuse Layer 2: IP-based Redis check ---
     const ipAlreadyVoted = await hasIpVoted(voterIp, poll.id);
     if (ipAlreadyVoted) {
       res.status(409).json({
@@ -280,7 +290,7 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
       return;
     }
 
-    // --- Insert vote (DB unique constraint is anti-abuse check #1) ---
+    // --- Insert vote (DB unique constraints are Layer 1: fingerprint + IP) ---
     const { error: voteError } = await supabase
       .from('votes')
       .insert({
@@ -293,6 +303,13 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
     if (voteError) {
       // unique constraint violation means duplicate vote
       if (voteError.code === '23505') {
+        // Set cookie even on constraint hit so future requests are blocked faster
+        res.cookie(cookieName, '1', {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+        });
         res.status(409).json({
           error: 'Already voted',
           message: 'You have already voted on this poll.',
@@ -304,8 +321,18 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
       return;
     }
 
-    // mark IP in redis
+    // --- Success: set all tracking layers ---
+
+    // Layer 2: mark IP in redis (24h TTL)
     await markIpVoted(voterIp, poll.id);
+
+    // Layer 3: set HTTP-only cookie (24h)
+    res.cookie(cookieName, '1', {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
 
     // invalidate vote count cache
     try {

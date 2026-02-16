@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/config/redis.ts","./src/config/supabase.ts","./src/middleware/ratelimit.ts","./src/routes/polls.ts","./src/socket/pollrooms.ts","./src/utils/helpers.ts"],"version":"5.9.3"}

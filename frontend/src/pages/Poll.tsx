@@ -31,7 +31,7 @@ export function Poll() {
 
     const fetchPoll = async () => {
       try {
-        const fingerprint = getDeviceFingerprint()
+        const fingerprint = await getDeviceFingerprint()
         const data = await api.getPoll(shareCode, fingerprint)
         setPollData(data)
 

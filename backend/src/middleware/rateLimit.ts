@@ -55,7 +55,7 @@ export async function markIpVoted(ip: string, pollId: string): Promise<void> {
   try {
     const redis = await getRedisClient();
     const key = `vote_lock:${ip}:${pollId}`;
-    await redis.set(key, '1', { EX: 3600 });
+    await redis.set(key, '1', { EX: 86400 }); // 24 hours
   } catch (err) {
     console.error('Failed to mark IP vote in Redis:', err);
   }

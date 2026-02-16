@@ -28,7 +28,7 @@ export function VotePanel({ shareCode, pollId, options, onVoteSuccess, isExpired
     setError(null)
 
     try {
-      const fingerprint = getDeviceFingerprint()
+      const fingerprint = await getDeviceFingerprint()
       const response = await api.vote(shareCode, selectedOption, fingerprint)
 
       if (response.success) {
