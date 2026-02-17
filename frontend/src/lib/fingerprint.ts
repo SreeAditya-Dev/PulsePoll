@@ -5,6 +5,11 @@
   from hardware/software signals that produce the SAME hash across different
   browsers on the same device (Chrome, Firefox, Edge, Incognito — all identical).
 
+  Why this matters:
+  - Prevents users from voting multiple times by opening Incognito/Private windows.
+  - Doesn't rely on cookies (which can be cleared).
+  - Respects privacy (we hash it immediately, we don't store raw signals).
+
   Layers:
   1. Canvas fingerprint — GPU/driver/OS-specific rendering
   2. Screen signature — resolution, color depth, pixel ratio

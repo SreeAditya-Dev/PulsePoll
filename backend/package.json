@@ -1,7 +1,8 @@
 {
-  "name": "pulsepoll-backend",
+  "name": "@pulsepoll/backend",
   "version": "1.0.0",
   "description": "PulsePoll real-time polling backend",
+  "author": "SreeAditya-Dev",
   "main": "dist/index.js",
   "scripts": {
     "dev": "npx nodemon --exec ts-node src/index.ts",

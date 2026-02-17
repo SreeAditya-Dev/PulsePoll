@@ -30,6 +30,8 @@ export function usePollSocket({ shareCode }: UsePollSocketProps): UsePollSocketR
     if (!shareCode) return;
 
     // Initialize socket connection
+    // We use a single socket connection per client to minimize overhead.
+    // Transports are forced to websocket first for performance, with polling fallback.
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
@@ -37,6 +39,13 @@ export function usePollSocket({ shareCode }: UsePollSocketProps): UsePollSocketR
     });
 
     const socket = socketRef.current;
+
+    /**
+     * Connection Logic:
+     * 1. Connect to the server.
+     * 2. Immediately join the specific poll room (shareCode).
+     * 3. Listen for state updates broadcasted to that room.
+     */
 
     socket.on('connect', () => {
       console.log('Socket connected');

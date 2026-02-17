@@ -278,6 +278,8 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
     }
 
     // --- Anti-abuse Layer 3: HTTP-only cookie check ---
+    // Why: Cookies persist even if IP changes (VPN usage).
+    // Security: HTTP-only prevents XSS access, Secure flag (prod) prevents interception.
     const cookieName = `pv_${poll.id.replace(/-/g, '').substring(0, 12)}`;
     if (req.cookies && req.cookies[cookieName]) {
       res.status(409).json({
@@ -303,6 +305,8 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
     const hashedFp = hashFingerprint(fingerprint);
 
     // --- Anti-abuse Layer 2: IP-based Redis check ---
+    // Why: Redis is much faster than DB for high-frequency checks.
+    // Strategy: Store IP with 24h expiration to block spam from same network.
     const ipAlreadyVoted = await hasIpVoted(voterIp, poll.id);
     if (ipAlreadyVoted) {
       res.status(409).json({
@@ -313,6 +317,7 @@ router.post('/:shareCode/vote', async (req: Request, res: Response) => {
     }
 
     // --- Insert vote (DB unique constraints are Layer 1: fingerprint + IP) ---
+    // Why: Database constraints are the final source of truth and cannot be bypassed.
     const { error: voteError } = await supabase
       .from('votes')
       .insert({
