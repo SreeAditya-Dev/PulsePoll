@@ -45,17 +45,26 @@ const globalLimiter = createRateLimiter({
 app.use('/api', globalLimiter);
 
 // mount routes
+// mount routes
 setSocketIO(io);
-app.use('/api/polls', pollRoutes);
+app.use('/api/v1/polls', pollRoutes);
+
+// standard health check response
+const getHealthStatus = () => ({
+  status: 'ok',
+  version: '1.0.0',
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime(),
+});
 
 // health check
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json(getHealthStatus());
 });
 
-// API-prefixed health check for test suite and clients using /api
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// API-prefixed health check for test suite and clients using /api/v1
+app.get('/api/v1/health', (_req, res) => {
+  res.json(getHealthStatus());
 });
 // setup socket handlers
 setupPollSockets(io);

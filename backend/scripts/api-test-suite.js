@@ -4,7 +4,7 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '../backend/.env') });
 
 const PORT = process.env.PORT || 4000;
-const API = `http://localhost:${PORT}/api`;
+const API = `http://localhost:${PORT}/api/v1`;
 
 let passed = 0;
 let failed = 0;

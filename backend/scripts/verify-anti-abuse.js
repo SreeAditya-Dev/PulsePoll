@@ -7,7 +7,7 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const PORT = process.env.PORT || 4000;
-const API_URL = `http://localhost:${PORT}/api`;
+const API_URL = `http://localhost:${PORT}/api/v1`;
 
 async function main() {
   console.log('🚀 Starting Anti-Abuse Verification (JS)...');

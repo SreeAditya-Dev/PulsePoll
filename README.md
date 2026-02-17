@@ -19,6 +19,7 @@
 
 ## 📋 Table of Contents
 
+- [Description](#-description)
 - [Features](#-features)
 - [Architecture](#-architecture)
 - [Anti-Abuse / Fairness Mechanisms](#-anti-abuse--fairness-mechanisms)
@@ -29,6 +30,12 @@
 - [Project Structure](#-project-structure)
 
 ---
+
+---
+
+## 📝 Description
+
+PulsePoll enables seamless group decision-making through instant polls. Whether for a quick team vote, a classroom quiz, or a social gathering, PulsePoll provides a frictionless experience where results are broadcasted in real-time to all connected users without the need for page refreshes.
 
 ## ✨ Features
 
@@ -279,6 +286,18 @@ graph LR
 | **Database**    | Supabase (Postgres 17)                    | Persistent storage for polls, options, votes |
 | **Cache**       | Redis                                     | Rate limiting, IP locking, vote count cache  |
 | **Fingerprint** | Canvas + WebGL + Web Crypto API           | Hardware-based device identification         |
+
+### Backend Stack Choices
+
+- **PostgreSQL (via Supabase)**:
+  - Chosen for its reliability and relational data integrity.
+  - Acts as the primary source of truth for persisting polls, options, and vote records.
+  - Ensures data is not lost even if the server restarts.
+
+- **Redis**:
+  - Implementation of high-performance data caching.
+  - **Vote Counts**: Caches aggregated vote tallies to reduce database load during high traffic.
+  - **Rate Limiting**: Stores temporary IP voting records and rate limit counters for efficient, low-latency anti-abuse checks.
 
 ---
 

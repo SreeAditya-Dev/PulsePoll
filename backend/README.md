@@ -15,14 +15,33 @@ Tests executed via TestSprite & Custom Node.js Script:
 > **Note on Low Network Areas:**
 > The architecture uses **Socket.IO over WebSocket**, which maintains a single persistent connection. This is significantly better for low-bandwidth environments than standard REST polling, as it avoids repeated HTTP handshake overhead. Even with 300ms network latency, the app will remain responsive.
 
-## 🛠 Tech Stack
+## 🛠 Tech Stack & Architecture Choices
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Real-Time:** Socket.IO
-- **Database:** Supabase (PostgreSQL)
-- **Cache/Rate Limit:** Redis
-- **Security:** Helmet, CORS, Cookie-Parser, Rate-Limit
+### Core Runtime
+
+- **Node.js**: Selected for its event-driven, non-blocking I/O model, which is ideal for real-time applications handling concurrent WebSocket connections and API requests.
+- **Express.js**: simple, unopinioned web framework that allows for rapid API development and easy middleware integration (CORS, Rate Limiting).
+
+### Real-Time Communication
+
+- **Socket.IO**: Chosen over raw WebSockets because:
+  - **Reliability**: Auto-reconnection and fallback to HTTP long-polling if WebSockets are blocked.
+  - **Rooms**: Built-in support for "rooms" (one room per poll) makes broadcasting updates to specific groups of users trivial.
+  - **Events**: Event-based architecture matches the "action -> reaction" flow of voting.
+
+### Data Persistence
+
+- **PostgreSQL (via Supabase)**:
+  - **Relational Integrity**: Strict schema ensures valid relationships between Polls, Options, and Votes.
+  - **ACID Compliance**: Crucial for ensuring that every vote is recorded accurately and permanent, preventing data loss during server restarts.
+  - **Row Level Security**: While not used in this anonymous MVP, Supabase offers RLS for future auth-based features.
+
+### Performance & Security
+
+- **Redis**:
+  - **High-Performance Caching**: Used to cache real-time vote counts (`poll_votes:<id>`), reducing DB load by serving reads from memory.
+  - **Rate Limiting (Anti-Abuse)**: Stores short-lived keys (`vote_lock:<ip>`) to block spam voting at the network edge with sub-millisecond latency.
+  - **Transient State**: Perfect for data that needs to expire automatically (like 24h IP locks).
 
 ## 🏃‍♂️ Getting Started
 
@@ -56,9 +75,10 @@ Tests executed via TestSprite & Custom Node.js Script:
 
 ## 🔌 API Endpoints
 
-- `POST /api/polls` - Create a new poll
-- `GET /api/polls/:shareCode` - Get poll details
-- `POST /api/polls/:shareCode/vote` - Cast a vote
+- `POST /api/v1/polls` - Create a new poll
+- `GET /api/v1/polls/:shareCode` - Get poll details
+- `POST /api/v1/polls/:shareCode/vote` - Cast a vote
+- `GET /api/v1/health` - Service health check
 
 ## 📡 Socket.IO Events
 

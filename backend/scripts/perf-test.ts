@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { performance } from 'perf_hooks';
 
 const BASE_URL = 'http://localhost:4000';
-const API_URL = `${BASE_URL}/api`;
+const API_URL = `${BASE_URL}/api/v1`;
 
 async function measureApiLatency() {
   console.log('\n--- API Latency Test ---');
