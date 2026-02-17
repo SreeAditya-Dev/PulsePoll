@@ -1,6 +1,6 @@
 import type { CreatePollRequest, CreatePollResponse, PollData, VoteResponse } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:4000/api/v1`;
+const API_BASE_URL = (import.meta.env.VITE_API_URL || `http://${window.location.hostname}:4000/api/v1`).replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;
