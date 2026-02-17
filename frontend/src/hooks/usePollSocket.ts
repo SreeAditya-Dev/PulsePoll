@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || `http://${window.location.hostname}:4000`).replace(/\/$/, '');
+// Fallback to Render URL if env var is missing (vital for Vercel deployment)
+const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || 'https://pulsepoll.onrender.com').replace(/\/$/, '');
 
 interface UsePollSocketProps {
   shareCode: string | undefined;

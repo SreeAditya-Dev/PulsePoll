@@ -1,6 +1,7 @@
 import type { CreatePollRequest, CreatePollResponse, PollData, VoteResponse } from './types';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || `http://${window.location.hostname}:4000/api/v1`).replace(/\/$/, '');
+// Fallback to Render URL if env var is missing (vital for Vercel deployment)
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://pulsepoll.onrender.com/api/v1').replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;
